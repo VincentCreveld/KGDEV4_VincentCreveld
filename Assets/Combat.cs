@@ -32,7 +32,6 @@ public class Combat : NetworkBehaviour {
 	public void TakeDamage(int amount) {
 		if(!isServer)
 			return;
-
 		health -= amount;
 		RpcSetColor();
 		if(health <= 0) {
