@@ -15,16 +15,22 @@ public class Combat : NetworkBehaviour {
 
 	private void Awake() {
 		mR = GetComponent<MeshRenderer>();
-		RpcSetColor();
+		CmdSetColor();
 	}
 
 	private void GetGrade() {
 		meshColor =  new Color(0,1f - (((float)maxHealth - (float)health) / (float)maxHealth), 0);
 	}
 
-	[ClientRpc]
-	private void RpcSetColor() {
+	[Command]
+	private void CmdSetColor() {
 		GetGrade();
+		RpcUpdateColor(meshColor);
+	}
+
+	[ClientRpc]
+	public void RpcUpdateColor(Color c) {
+		meshColor = c;
 		mR.material.color = meshColor;
 	}
 
@@ -33,16 +39,16 @@ public class Combat : NetworkBehaviour {
 		if(!isServer)
 			return;
 		health -= amount;
-		RpcSetColor();
+		CmdSetColor();
 		if(health <= 0) {
 			if(destroyOnDeath) {
 				Destroy(gameObject);
 			}
 			else {
 				health = maxHealth;
-				RpcSetColor();
 				// called on the server, will be invoked on the clients
 				RpcRespawn();
+				CmdSetColor();
 			}
 		}
 	}
@@ -51,7 +57,7 @@ public class Combat : NetworkBehaviour {
 	void RpcRespawn() {
 		if(isLocalPlayer) {
 			// move back to zero location
-			RpcSetColor();
+			CmdSetColor();
 			transform.position = Vector3.zero;
 		}
 	}

@@ -4,9 +4,16 @@ using UnityEngine.Networking;
 public class PlayerMove : NetworkBehaviour {
 
 	public GameObject bullet;
+	[SyncVar]
+	public int id;
 
 	public override void OnStartLocalPlayer() {
-		GetComponent<MeshRenderer>().material.color = Color.blue;
+		transform.GetChild(0).GetComponent<MeshRenderer>().material.color = Color.blue;
+		TurnManager.instance.SubscribePlayer(this);
+	}
+
+	public void OnDisconnectedFromServer(NetworkDisconnection info) {
+		TurnManager.instance.UnsubscribePlayer(this, info);
 	}
 
 	private void Update() {
@@ -16,7 +23,8 @@ public class PlayerMove : NetworkBehaviour {
 		var x = Input.GetAxis("Horizontal") * 0.1f;
 		var z = Input.GetAxis("Vertical") * 0.1f;
 
-		transform.Translate(x, 0, z);
+		transform.Rotate(0, x * 25, 0);
+		transform.Translate(0, 0, -z);
 
 		if(Input.GetKeyDown(KeyCode.Space)) {
 			//Debug.Log("Fire!");
@@ -27,12 +35,15 @@ public class PlayerMove : NetworkBehaviour {
 
 	[Command]
 	private void CmdFire() {
-		GameObject b = Instantiate(bullet, transform.position - transform.forward, Quaternion.identity);
-		b.GetComponent<Rigidbody>().velocity = -transform.forward * 4;
+		if(TurnManager.instance.IsTurn(this)) {
+			GameObject b = Instantiate(bullet, transform.position - transform.forward, transform.rotation);
+			b.GetComponent<Rigidbody>().velocity = -transform.forward * 4;
 
-		NetworkServer.Spawn(b);
+			NetworkServer.Spawn(b);
 
-		Destroy(b, 2f);
+			Destroy(b, 2f);
+			TurnManager.instance.NextTurn();
+		}
 	}
 
 }
