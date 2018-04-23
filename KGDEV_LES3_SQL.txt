@@ -3,6 +3,7 @@ SELECT * FROM `Scores` WHERE `Score` < 100 AND `id` = 2
 SELECT * FROM `Scores` WHERE `Score` > 100 AND `gameid` = 3
 SELECT MAX(`score`) FROM `Scores` WHERE `gameid` = 5
 
+$query = "SELECT * FROM Scores WHERE score > 100 AND (gameid = 5 OR gameid = 3)"
 
 
 
