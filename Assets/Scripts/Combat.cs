@@ -23,19 +23,18 @@ public class Combat : NetworkBehaviour {
 	}
 
 	public void TakeDamage(int amount) {
-		if(!isServer)
-			return;
-		health -= amount;
-		if(health <= 0) {
-			if(destroyOnDeath) {
-				Destroy(gameObject);
-			}
-			else {
-				health = maxHealth;
-				// called on the server, will be invoked on the clients
-				RpcRespawn();
-			}
-		}
+		Debug.Log("hit");
+		//health -= amount;
+		//if(health <= 0) {
+		//	if(destroyOnDeath) {
+		//		Destroy(gameObject);
+		//	}
+		//	else {
+		//		health = maxHealth;
+		//		// called on the server, will be invoked on the clients
+		//		RpcRespawn();
+		//	}
+		//}
 	}
 
 	[ClientRpc]

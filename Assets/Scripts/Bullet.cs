@@ -15,8 +15,4 @@ public class Bullet : NetworkBehaviour {
 
 		Destroy(gameObject);
 	}
-
-	public void OnCollisionStay2D(Collision2D collision) {
-		Destroy(gameObject);
-	}
 }

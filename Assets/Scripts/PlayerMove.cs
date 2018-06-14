@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 [NetworkSettings(channel = 0, sendInterval = 0.05f)]
 public class PlayerMove : NetworkBehaviour {
@@ -10,8 +11,6 @@ public class PlayerMove : NetworkBehaviour {
 	public GameObject shield;
 	public float blockTime = 2f;
 	public float bulletSpeed = 7.5f;
-	[SyncVar]
-	public int id;
 
 	public float loadTime = 0f;
 
@@ -34,10 +33,13 @@ public class PlayerMove : NetworkBehaviour {
 		rb2D = GetComponent<Rigidbody2D>();
 		ySize = GetComponent<Collider2D>().bounds.extents.y;
 		extentsX = GetComponent<Collider2D>().bounds.extents.x;
+		//sessionManager = Transform.FindObjectOfType<SessionManager>();
+		//playerData = sessionManager.currentUser;
 	}
 
 	public override void OnStartLocalPlayer() {
 		Debug.Log("Connected " + transform.name);
+		
 		CmdPlayerJoined();
 		GameObject go = Instantiate(cameraObj, cameraSlot);
 		go.transform.position = cameraSlot.position;
@@ -87,13 +89,21 @@ public class PlayerMove : NetworkBehaviour {
 		canShoot = true;
 	}
 
+	public void OnClientDisconnect() {
+		Debug.Log("Disconnecting");
+	}
+
 	[ClientRpc]
 	public void RpcShoot() {
 		GameObject b = Instantiate(bullet, shootPos.position, Quaternion.identity);
 		float dir = isFacingRight ? bulletSpeed : -bulletSpeed;
 		b.GetComponent<Rigidbody2D>().velocity = transform.right * dir;
-		NetworkServer.Spawn(b);
 		Destroy(b, 2f);
+		if(hasAuthority)
+			SessionManager.sessionManager.AddScore(1);
+		if(!isServer)
+			return;
+		NetworkServer.Spawn(b);
 	}
 
 	[Command]
@@ -114,8 +124,10 @@ public class PlayerMove : NetworkBehaviour {
 	public void RpcBlock() {
 		GameObject b = Instantiate(shield, shootPos.position, Quaternion.identity);
 		b.transform.parent = shootPos;
-		NetworkServer.Spawn(b);
 		Destroy(b, blockTime);
+		if(!isServer)
+			return;
+		NetworkServer.Spawn(b);
 	}
 
 	[Command]
@@ -129,6 +141,26 @@ public class PlayerMove : NetworkBehaviour {
 		}
 		else
 			Debug.Log("Already blocked " + transform.name);
+	}
+
+	[Command]
+	public void CmdPushHighScores() {
+		RpcPushHighScores();
+	}
+
+	[ClientRpc]
+	public void RpcPushHighScores() {
+		SceneManager.LoadScene("ScorePushScene");
+	}
+
+	[Command]
+	public void CmdAddScore(int num) {
+		 RpcAddScore(num);
+	}
+
+	[ClientRpc]
+	public void RpcAddScore(int num) {
+		SessionManager.sessionManager.AddScore(1);
 	}
 
 	[Command]

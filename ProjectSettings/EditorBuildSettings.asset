@@ -9,5 +9,11 @@ EditorBuildSettings:
     path: Assets/Lobby.unity
     guid: 326ecb9ef76730b4c8ba91228c00910f
   - enabled: 1
+    path: Assets/OfflineScene.unity
+    guid: 89a55e608fbf58e48adaf5883f6bcc11
+  - enabled: 1
     path: Assets/OnlineScene.unity
     guid: ffb89da8f3e221240b7f8d30ee2ba42b
+  - enabled: 1
+    path: Assets/ScorePushScene.unity
+    guid: f08cc1d5ca417c348b7ee0ab85edbaf4
