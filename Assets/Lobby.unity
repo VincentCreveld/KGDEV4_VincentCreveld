@@ -883,7 +883,6 @@ GameObject:
   m_Component:
   - component: {fileID: 596422774}
   - component: {fileID: 596422773}
-  - component: {fileID: 596422772}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -891,26 +890,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &596422772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 596422771}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab6c73f25c97d344b9b668affeb9abd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  emailField: {fileID: 747047258}
-  passwordField: {fileID: 948939856}
-  currentUser:
-    sessionID: 
-    id: 0
-    username: 
-    password: 
-    email: 
-    score: 0
 --- !u!114 &596422773
 MonoBehaviour:
   m_ObjectHideFlags: 0

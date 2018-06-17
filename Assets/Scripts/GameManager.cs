@@ -7,6 +7,8 @@ public class GameManager : NetworkBehaviour {
 
 	public static GameManager instance;
 
+	public const float GAME_DURATION = 20f;
+
 	public Transform[] spawnPositions;
 	private List<NetworkConnection> players = new List<NetworkConnection>();
 	private List<GameObject> playerObjects = new List<GameObject>();
@@ -16,14 +18,12 @@ public class GameManager : NetworkBehaviour {
 			instance = this;
 		else
 			Destroy(this);
-		// GetComponent<NetworkManagerHUD>().enabled = true;
+		
 		Transform.FindObjectOfType<NetworkManagerHUD>().enabled = true;
 	}
 
-	private void Update() {
-
-	}
-
+	// Called when a player joins the server and adds their data to two lists that hold their gameObject and connectionData.
+	// When two players are connected (and no more, limited in network manager) the game initialises.
 	[Command]
 	public void CmdPlayerJoined(GameObject obj) {
 		NetworkConnection networkID = obj.GetComponent<NetworkIdentity>().connectionToClient;
@@ -43,6 +43,8 @@ public class GameManager : NetworkBehaviour {
 		}
 	}
 
+	// Called when two players are connected. Assigns both players their relevant data.
+	// Initialises turns.
 	[Command]
 	public void CmdInitializeGame() {
 		playerObjects[0].GetComponent<PlayerMove>().isTurn = true;
@@ -57,23 +59,23 @@ public class GameManager : NetworkBehaviour {
 		StartCoroutine(GameDuration());
 	}
 
+	// Limits game duration and disconnects players.
 	private IEnumerator GameDuration() {
 		Debug.Log("Started timer");
-		yield return new WaitForSeconds(20f);
+		yield return new WaitForSeconds(GAME_DURATION);
 		Debug.Log("Timer expired");
 		CmdDisconnectPlayers();
 	}
-
 	[Command]
 	public void CmdDisconnectPlayers() {
 		Debug.Log("Reached DC");
-		//playerObjects[0].GetComponent<PlayerMove>().sessionManager.PushHighscore();
-		//playerObjects[1].GetComponent<PlayerMove>().sessionManager.PushHighscore();
-		SessionManager.sessionManager.PushHighscore();
+		playerObjects[0].GetComponent<PlayerMove>().RpcSubmitScore();
+		playerObjects[1].GetComponent<PlayerMove>().RpcSubmitScore();
 		players[0].Disconnect();
 		players[1].Disconnect();
 	}
 
+	// Called when succesfully shot by either player. Sets all relevant bools needed to play.
 	[Command]
 	public void CmdChangeTurn() {
 		//Debug.Log("Reached");

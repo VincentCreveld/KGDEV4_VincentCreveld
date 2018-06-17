@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 [NetworkSettings(channel = 0, sendInterval = 0.05f)]
+// This script is where all the movement and combat values are handled.
 public class PlayerMove : NetworkBehaviour {
 
 	public GameObject bullet;
@@ -56,15 +57,22 @@ public class PlayerMove : NetworkBehaviour {
 		Debug.Log("Disconnect " + transform.name);
 	}
 
+	[ClientRpc]
+	public void RpcSubmitScore() {
+		SessionManager.sessionManager.PushHighscore();
+	}
+
 	private void Update() {
 		if(!isLocalPlayer)
 			return;
 
+		// OnClick check if the player can shoot or block. Communcates with "TurnManager.cs" to determine this.
 		if(Input.GetMouseButtonDown(0)) {
 			Debug.Log("Fire! " + transform.name);
 			TurnManager.CheckTurns(this);
 		}
 
+		//Input checks for the movement. Code can be found at the bottom of the class.
 		CheckJump();
 		CheckMovement();
 		CheckDash();
@@ -77,20 +85,16 @@ public class PlayerMove : NetworkBehaviour {
 		ModifyJumpForce();
 	}
 
+	// These enums prevent the players from spamming their given weapon.
 	public IEnumerator EndShotDelay() {
 		CmdToggleGun(false);
 		yield return new WaitForSeconds(loadTime);
 		CmdChangeTurn();
 	}
-
 	public IEnumerator LoadGun() {
 		yield return new WaitForSeconds(loadTime);
 		CmdToggleGun(true);
 		canShoot = true;
-	}
-
-	public void OnClientDisconnect() {
-		Debug.Log("Disconnecting");
 	}
 
 	[ClientRpc]
@@ -106,12 +110,10 @@ public class PlayerMove : NetworkBehaviour {
 		NetworkServer.Spawn(b);
 	}
 
+	// Called by TurnManager if it is player's turn.
 	[Command]
 	public void CmdShoot() {
-		// fire bullet
-		//Debug.Log("Reached fire on" + transform.name);
 		if(canShoot) {
-			//Debug.Log("Shooting " + transform.name);
 			canShoot = false;
 			RpcShoot();
 			StartCoroutine(EndShotDelay());
@@ -130,37 +132,15 @@ public class PlayerMove : NetworkBehaviour {
 		NetworkServer.Spawn(b);
 	}
 
+	// Called by TurnManager if it is not player's turn.
 	[Command]
 	public void CmdBlock() {
-		//Debug.Log("Reached block on" + transform.name);
 		if(canBlock) {
-			// spawn shield for X time
-			//Debug.Log("Blocking " + transform.name);
 			RpcBlock();
 			canBlock = false;
 		}
 		else
 			Debug.Log("Already blocked " + transform.name);
-	}
-
-	[Command]
-	public void CmdPushHighScores() {
-		RpcPushHighScores();
-	}
-
-	[ClientRpc]
-	public void RpcPushHighScores() {
-		SceneManager.LoadScene("ScorePushScene");
-	}
-
-	[Command]
-	public void CmdAddScore(int num) {
-		 RpcAddScore(num);
-	}
-
-	[ClientRpc]
-	public void RpcAddScore(int num) {
-		SessionManager.sessionManager.AddScore(1);
 	}
 
 	[Command]
@@ -179,6 +159,7 @@ public class PlayerMove : NetworkBehaviour {
 		GameManager.instance.CmdChangeTurn();
 	}
 
+	#region Movement related code. Orignally made for Project Vrij 2.
 	#region Dash related code
 	[Header("Dash variables")]
 
@@ -370,6 +351,6 @@ public class PlayerMove : NetworkBehaviour {
 
 
 	#endregion
-
+	#endregion
 
 }

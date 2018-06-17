@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+// This script is called by the PlayerMove scripts when they want to take action and 
+// get back that they can either spawn a bullet or a shield.
 public static class TurnManager {
 
 	public static void CheckTurns(PlayerMove pm) {
